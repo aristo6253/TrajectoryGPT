@@ -47,22 +47,26 @@ def main():
     depth_b64 = encode_image(depth_path)
     bev_b64 = encode_image(bev_path)
 
-    controls = "(forward = increase z, right = increase x, down = increase y, yaw right = increase yaw, pitch up = increase pitch, roll right = increase roll)"
 
-    full_user_prompt = f"Trajectory Description: {traj_desc}\nCurrent step: {max_step}\nNavigation Controls: {controls}\nBefore giving your motion command state the navigation controls conventions."
+    full_user_prompt = f"""Trajectory Step {max_step} — Plan the next move.
 
+Goal:
+{traj_desc}
+
+Reminder: Respond with:
+1. Step-by-step reasoning (max 4 lines)
+2. Motion command in format: `dx dy dz dyaw dpitch droll`
+Follow camera-centric conventions exactly. No extra text.
+"""
     print(f"{full_user_prompt = }")
 
     # Create the prompt and image inputs
     messages = [
-        {"role": "system", "content": gpt_params.SYSTEM_PROMPT.strip()},
+        {"role": "system", "content": gpt_params.SYSTEM_PROMPT2.strip()},
         {
             "role": "user",
             "content": [
-                {
-                    "type": "text",
-                    "text": traj_desc
-                },
+                {"type": "text", "text": full_user_prompt},
                 {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{rgb_b64}"}},
                 {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{depth_b64}"}},
                 {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{bev_b64}"}},
